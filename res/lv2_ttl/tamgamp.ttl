@@ -1,0 +1,187 @@
+# This file is part of tamgamp.lv2 <https://github.com/sadko4u/tamgamp.lv2>.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 3 of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+@prefix lv2:        <http://lv2plug.in/ns/lv2core#> .
+@prefix pg:         <http://lv2plug.in/ns/ext/port-groups#> .
+@prefix doap:       <http://usefulinc.com/ns/doap#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix pp:         <http://lv2plug.in/ns/ext/port-props#> .
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix urid:       <http://lv2plug.in/ns/ext/urid#> .
+@prefix units:      <http://lv2plug.in/ns/extensions/units#> .
+
+@prefix plug:       <@COMPANY_URL@/lv2/> .
+@prefix plug_pg:    <@COMPANY_URL@/pg/> .
+@prefix plug_dev:   <@COMPANY_URL@/developers/> .
+@prefix lsp_dev:    <http://lsp-plug.in/developers/> .
+
+lsp_dev:v_sadovnikov
+	a foaf:Person ;
+	foaf:name "Vladimir Sadovnikov" ;
+	foaf:nick "SadKo" ;
+	foaf:mbox <mailto:lsp.plugin@gmail.com> ;
+	foaf:homepage <http://lsp-plug.in/#v_sadovnikov>
+	.
+
+plug_dev:@COMPANY_ID@
+	a foaf:Person ;
+	foaf:name "@COMPANY_NAME@" ;
+	foaf:homepage <@COMPANY_URL@/>
+	.
+
+plug_pg:mono_in
+	a pg:MonoGroup, pg:InputGroup ;
+	lv2:symbol "mono_in";
+	rdfs:label "Mono Input"
+	.
+
+plug_pg:mono_out
+	a pg:MonoGroup, pg:OutputGroup ;
+	lv2:symbol "mono_out";
+	rdfs:label "Mono Output"
+	.
+
+plug:tamgamp
+	a lv2:Plugin, doap:Project, lv2:AmplifierPlugin ;
+	doap:name "Tamgamp" ;
+	lv2:minorVersion 0 ;
+	lv2:microVersion 0 ;
+	doap:developer lsp_dev:v_sadovnikov ;
+	doap:maintainer plug_dev:@COMPANY_ID@ ;
+	doap:license <http://usefulinc.com/doap/licenses/lgpl> ;
+	lv2:binary <@LV2_BINARY@> ;
+
+	lv2:requiredFeature urid:map ;
+	lv2:optionalFeature lv2:hardRTCapable ;
+
+	lv2:port [
+		a lv2:InputPort, lv2:AudioPort ;
+		lv2:index 0 ;
+		lv2:symbol "in" ;
+		lv2:name "Input" ;
+		pg:group plug_pg:mono_in ;
+		lv2:designation pg:center ;
+	] , [
+		a lv2:OutputPort, lv2:AudioPort ;
+		lv2:index 1 ;
+		lv2:symbol "out" ;
+		lv2:name "Output" ;
+		pg:group plug_pg:mono_out ;
+		lv2:designation pg:center ;
+	] , [
+		a lv2:InputPort, lv2:ControlPort ;
+		lv2:index 2 ;
+		lv2:symbol "enable" ;
+		lv2:name "Enable" ;
+		lv2:portProperty lv2:toggled ;
+		lv2:minimum 0 ;
+		lv2:maximum 1 ;
+		lv2:default 1 ;
+		lv2:designation lv2:enabled ;
+	] , [
+		a lv2:InputPort, lv2:ControlPort ;
+		lv2:index 3 ;
+		lv2:symbol "preamp" ;
+		lv2:name "Amplifier chain" ;
+		lv2:portProperty lv2:integer, lv2:enumeration, pp:hasStrictBounds ;
+		lv2:scalePoint
+			[ rdfs:label "none"; rdf:value 0 ] ,
+			[ rdfs:label "Mesa/Boogie DC3 Rhythm Channel"; rdf:value 1 ],
+			[ rdfs:label "Mesa/Boogie DC3 Lead Channel"; rdf:value 2 ],
+			[ rdfs:label "Marshall JCM800 Series High Input"; rdf:value 3 ],
+			[ rdfs:label "Marshall JCM800 Series Low Input"; rdf:value 4 ],
+			[ rdfs:label "Mesa Dual Rectifier Orange Channel"; rdf:value 5 ],
+			[ rdfs:label "Mesa Dual Rectifier Red Channel"; rdf:value 6 ],
+			[ rdfs:label "Fender Princeton AA1164"; rdf:value 7 ],
+			[ rdfs:label "Fender Twin Reverb AA769 Normal"; rdf:value 8 ],
+			[ rdfs:label "Fender Twin Reverb AA769 Vibrato"; rdf:value 9 ],
+			[ rdfs:label "VOX AC-30 Normal Channel"; rdf:value 10 ],
+			[ rdfs:label "VOX AC-30 Brilliant Channel"; rdf:value 11 ],
+			[ rdfs:label "Peavey 5150II Crunch Channel"; rdf:value 12 ],
+			[ rdfs:label "Peavey 5150II Lead Channel"; rdf:value 13 ]
+			;
+		lv2:minimum 0 ;
+		lv2:maximum 13 ;
+		lv2:default 0 ;
+	] , [
+		a lv2:InputPort, lv2:ControlPort ;
+		lv2:index 4 ;
+		lv2:symbol "pregain" ;
+		lv2:name "Input level correction" ;
+		units:unit units:db ;
+		lv2:designation lv2:control ;
+		lv2:portProperty pp:logarithmic, pp:hasStrictBounds ;
+		lv2:minimum -72 ;
+		lv2:maximum 48 ;
+		lv2:default 0 ;
+	] , [
+		a lv2:InputPort, lv2:ControlPort ;
+		lv2:index 5 ;
+		lv2:symbol "gain" ;
+		lv2:name "Amplifier gain" ;
+		units:unit units:pc ;
+		lv2:designation lv2:control ;
+		lv2:portProperty pp:hasStrictBounds ;
+		lv2:default 50 ;
+		lv2:minimum 1 ;
+		lv2:maximum 100 ;
+	] , [
+		a lv2:InputPort, lv2:ControlPort ;
+		lv2:index 6 ;
+		lv2:symbol "bass" ;
+		lv2:name "Bass" ;
+		units:unit units:pc ;
+		lv2:designation lv2:control ;
+		lv2:portProperty pp:hasStrictBounds ;
+		lv2:default 50 ;
+		lv2:minimum 0 ;
+		lv2:maximum 100 ;
+	] , [
+		a lv2:InputPort, lv2:ControlPort ;
+		lv2:index 7 ;
+		lv2:symbol "middle" ;
+		lv2:name "Middle" ;
+		units:unit units:pc ;
+		lv2:designation lv2:control ;
+		lv2:portProperty pp:hasStrictBounds ;
+		lv2:default 50 ;
+		lv2:minimum 0 ;
+		lv2:maximum 100 ;
+	] , [
+		a lv2:InputPort, lv2:ControlPort ;
+		lv2:index 8 ;
+		lv2:symbol "treble" ;
+		lv2:name "Treble" ;
+		units:unit units:pc ;
+		lv2:designation lv2:control ;
+		lv2:portProperty pp:hasStrictBounds ;
+		lv2:default 50 ;
+		lv2:minimum 0 ;
+		lv2:maximum 100 ;
+	] , [
+		a lv2:InputPort, lv2:ControlPort ;
+		lv2:index 9 ;
+		lv2:symbol "out_gain" ;
+		lv2:name "Output level correction" ;
+		units:unit units:db ;
+		lv2:portProperty pp:logarithmic, pp:hasStrictBounds ;
+		lv2:default 0 ;
+		lv2:minimum -72 ;
+		lv2:maximum 48 ;
+	] @TUNE@
+	.
+

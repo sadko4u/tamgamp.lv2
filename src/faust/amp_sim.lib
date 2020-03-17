@@ -1,0 +1,159 @@
+/*
+ * Simulation of Guitarix amplifier chain
+ * 
+ * Copyright (C) 2009, 2010 Hermann Meyer, James Warden, Andreas Degert
+ * Copyright (C) 2011 Pete Shorthose <http://guitarix.org/>
+ * This file is part of tamgamp.lv2 <https://github.com/sadko4u/tamgamp.lv2>.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
+
+/*
+* helper definitions
+*/
+clip(lo,hi) = min(hi) : max(lo);
+sym_clip(thr) = clip(-thr,thr);
+
+balance(b) = *(1 - max(0, b)), *(1 - max(0, -b));
+wet_dry_mix(w, Fx) = _ <: _, Fx : balance(w) : +;
+
+/*
+* nonlinear functions
+*/
+
+saturate(t, x) = select2(abs(x) < t, x, v)
+with {
+  sigmoid(x) = x * (1.5 - 0.5 * x * x);
+  sat(x) = t + (1 - t)*sigmoid((abs(x)-t)/((1-t)*1.5));
+  v = copysign(x, sat(x));
+};
+
+valve = environment {
+    ex(x) = (1 - exp(-x));
+    nlim = 50; // exp(-nlim)+1 == 1, exp(nlim)/(exp(nlim)+1) == 1
+
+    tr(x) = select2(abs(x) > eps, tr_taylor(x), tr_func(max(-600,x))) with
+    {
+        eps = pow(10,-4);
+        tr_func(x) = select2(x < -nlim, x / ex(x), -x*exp(x));
+        tr_taylor(x) = 1 + x/2 + x*x/12;
+    };
+    df(x) = select2(abs(x) > eps, df_taylor(x), df_func(max(-600,x))) with
+    {
+        eps = pow(10,-4);
+        df_func(x) = select2(x < -nlim, 1/ex(x) - (x * exp(-x)) / (ex(x)*ex(x)), -x*exp(x));
+        df_taylor(x) = 0.5 + x/6 - x*x*x/180;
+    };
+    qd(dist, q, x) = dist * (x - q);
+    vt(dist, q, x) = (tr(qd(dist, q, x)) - tr(qd(dist, q, 0))) / dist;
+    vt_scaled(dist, q, x) = select2(dist*q > nlim, vt(dist, q, x) / df(qd(dist, q, 0)), vt_lim(dist, q, x)) with
+    {
+        bigval = pow(10,10);
+        f(dist, q, x) = (qd(dist, q, x)/(1 - exp(-qd(dist, q, x)))*exp(dist*q) - dist*q)/(dist*dist*q);
+        vt_lim(dist, q, x) = select2(dist*x > nlim, select2(dist*x < -nlim, f(dist, q, x), -1/dist), bigval);
+    };
+    vts(dist, q, x) = abs(x) : ma.neg : vt_scaled(dist, q) : copysign(_, x);
+    vtu(dist, q, g) = vt_scaled(dist, q) : *(g) : ma.neg : vt(dist, q) : ma.neg;
+    vtu_(dist, q, g) = vt_scaled(dist, q) :ma.neg :  *(g) : vt_scaled(dist, q) : /(g) : ma.neg;
+};
+
+// Simple triode circuit emulation
+Ftube = ffunction(float Ftube(int,float), "resources/valve.h", "");
+
+TB_12AX7_68k     = fconstant(int TUBE_TABLE_12AX7_68k,     "resources/valve.h");
+TB_12AX7_250k    = fconstant(int TUBE_TABLE_12AX7_250k,    "resources/valve.h");
+TB_6V6_68k       = fconstant(int TUBE_TABLE_6V6_68k,       "resources/valve.h");
+TB_6V6_250k      = fconstant(int TUBE_TABLE_6V6_250k,      "resources/valve.h");
+TB_12AU7_68k     = fconstant(int TUBE_TABLE_12AU7_68k,     "resources/valve.h");
+TB_12AU7_250k    = fconstant(int TUBE_TABLE_12AU7_250k,    "resources/valve.h");
+TB_6DJ8_68k      = fconstant(int TUBE_TABLE_6DJ8_68k,      "resources/valve.h");
+TB_6DJ8_250k     = fconstant(int TUBE_TABLE_6DJ8_250k,     "resources/valve.h");
+TB_12AT7_68k     = fconstant(int TUBE_TABLE_12AT7_68k,     "resources/valve.h");
+TB_12AT7_250k    = fconstant(int TUBE_TABLE_12AT7_250k,    "resources/valve.h");
+TB_6C16_68k      = fconstant(int TUBE_TABLE_6C16_68k,      "resources/valve.h");
+TB_6C16_250k     = fconstant(int TUBE_TABLE_6C16_250k,     "resources/valve.h");
+TB_6L6CG_68k     = fconstant(int TUBE_TABLE_6L6CG_68k,     "resources/valve.h");
+TB_6L6CG_250k    = fconstant(int TUBE_TABLE_6L6CG_250k,    "resources/valve.h");
+TB_EL34_68k      = fconstant(int TUBE_TABLE_EL34_68k,      "resources/valve.h");
+TB_EL34_250k     = fconstant(int TUBE_TABLE_EL34_250k,     "resources/valve.h");
+TB_12AY7_68k     = fconstant(int TUBE_TABLE_12AY7_68k,     "resources/valve.h");
+TB_12AY7_250k    = fconstant(int TUBE_TABLE_12AY7_250k,    "resources/valve.h");
+TB_JJECC83S_68k  = fconstant(int TUBE_TABLE_JJECC83S_68k,  "resources/valve.h");
+TB_JJECC83S_250k = fconstant(int TUBE_TABLE_JJECC83S_250k, "resources/valve.h");
+TB_JJECC99_68k   = fconstant(int TUBE_TABLE_JJECC83S_68k,  "resources/valve.h");
+TB_JJECC99_250k  = fconstant(int TUBE_TABLE_JJECC83S_250k, "resources/valve.h");
+TB_EL84_68k      = fconstant(int TUBE_TABLE_EL84_68k,      "resources/valve.h");
+TB_EL84_250k     = fconstant(int TUBE_TABLE_EL84_250k,     "resources/valve.h");
+TB_EF86_68k      = fconstant(int TUBE_TABLE_EF86_68k,      "resources/valve.h");
+TB_EF86_250k     = fconstant(int TUBE_TABLE_EF86_250k,     "resources/valve.h");
+TB_SVEL34_68k    = fconstant(int TUBE_TABLE_SVEL34_68k,    "resources/valve.h");
+TB_SVEL34_250k   = fconstant(int TUBE_TABLE_SVEL34_250k,   "resources/valve.h");
+
+tubestageF(tb,vplus,divider,fck,Rk,Vk0) = anti_aliase: tube : hpf with {
+    lpfk = fi.lowpass(1,fck);
+    anti_aliase = fi.lowpass(3,ma.SR/2.1);
+    Rp = 100.0e3;
+    VkC = Vk0 * (Rp/Rk);
+    tube = (+ : -(Vk0) : Ftube(tb) : +(VkC-vplus)) ~ (*(Rk/Rp) : lpfk) : /(divider);
+    hpf = fi.highpass(1,31.0);
+};
+
+// SHP : This version allows user setting of Vplus and Divider
+// Useful as many circuits do not have 100K default here ( marshall preamps, all power tubes etc )
+tubestageP(tb,vplus,divider,Rp,fck,Rk,Vk0) = anti_aliase : tube : hpf with {
+    lpfk = fi.lowpass(1,fck);
+    anti_aliase = fi.lowpass(3,ma.SR/2.1);
+    VkC = Vk0 * (Rp/Rk);
+    tube = (+ : -(Vk0) : Ftube(tb) : +(VkC-vplus)) ~ (*(Rk/Rp) : lpfk) : /(divider);
+    hpf = fi.highpass(1,31.0);
+};
+
+tubestage(tb,fck,Rk,Vk0)  = tubestageF(tb,250.0,40.0,fck,Rk,Vk0);
+tubestage130_10(tb,fck,Rk,Vk0) = tubestageF(tb,130.0,10.0,fck,Rk,Vk0);
+tubestage130_20(tb,fck,Rk,Vk0) = tubestageF(tb,130.0,20.0,fck,Rk,Vk0);
+
+import("stdfaust.lib");
+
+/****************************************************************
+** parameter definitions for use in alternative module
+*/
+
+// 0 .. + 48dB potentiometer
+pot_48db(gain) = _ : *((gain - 0.01) * 48.48) : ba.db2linear : _ ;
+
+ampctrl = environment {
+    pregain     = vslider(".amp.pregain", 1.0, 0.00398, 251.18861, 0.0001) : si.smooth(0.999);      // Pre-gain control
+    gain        = vslider(".amp.gain", 0.5, 0, 1, 0.01);                                            // Gain control
+    master      = vslider(".amp.master", 0.5, 0, 1, 0.01);                                          // Master volume
+    bass        = vslider(".amp.bass", 0.5, 0, 1, 0.01);                                            // Bass control
+    middle      = vslider(".amp.middle", 0.5, 0, 1, 0.01);                                          // Middle control
+    treble      = vslider(".amp.treble", 0.5, 0, 1, 0.01);                                          // Treble control
+    presence    = vslider(".amp.presence", 0.5, 0, 1, 0.01);                                        // Presence
+    bias        = vslider(".amp.bias", 0.5, 0, 1, 0.01);                                            // Bias
+    postgain    = vslider(".amp.postgain", 1.0, 0.00398, 251.18861, 0.0001) : si.smooth(0.999);     // Post-gain control
+    
+    tune1       = vslider(".amp.tune1", 1.0, 0.01, 100.0, 0.01) : si.smooth(0.999);
+    tune2       = vslider(".amp.tune2", 1.0, 0.01, 100.0, 0.01) : si.smooth(0.999);
+    tune3       = vslider(".amp.tune3", 1.0, 0.01, 100.0, 0.01) : si.smooth(0.999);
+    tune4       = vslider(".amp.tune4", 1.0, 0.01, 100.0, 0.01) : si.smooth(0.999);
+    tune5       = vslider(".amp.tune5", 1.0, 0.01, 100.0, 0.01) : si.smooth(0.999);
+    tune6       = vslider(".amp.tune6", 1.0, 0.01, 100.0, 0.01) : si.smooth(0.999);
+    tune7       = vslider(".amp.tune7", 1.0, 0.01, 100.0, 0.01) : si.smooth(0.999);
+    tune8       = vslider(".amp.tune8", 1.0, 0.01, 100.0, 0.01) : si.smooth(0.999);
+    tune9       = vslider(".amp.tune9", 1.0, 0.01, 100.0, 0.01) : si.smooth(0.999);
+    tune10      = vslider(".amp.tune10", 1.0, 0.01, 100.0, 0.01) : si.smooth(0.999);
+};
+

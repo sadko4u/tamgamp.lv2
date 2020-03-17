@@ -1,0 +1,7 @@
+/Debug/
+/.settings/*
+/.build/*
+/.install/*
+/**/*.log
+/**/*.sch~
+/**/*.sch#
