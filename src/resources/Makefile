@@ -37,6 +37,6 @@ $(BUILD_FILE): $(OBJFILES)
 
 $(OBJFILES):
 	mkdir -p $(dir $(@))
-	$(CXX) -o $(@) -c $(CPP_FILE) $(CPPFLAGS) $(CXXFLAGS) $(INCLUDE)
+	$(CXX) -o $(@) -c $(CPP_FILE) -fPIC $(CPPFLAGS) $(CXXFLAGS) $(INCLUDE)
 
 -include Makefile.d

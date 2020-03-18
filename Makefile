@@ -54,7 +54,6 @@ HEADERS_LV2      = $(shell $(PKG_CONFIG) --cflags lv2)
 
 # Setup compiler flags
 DFL_CFLAGS       = -O2 \
-                   -fPIC \
                    -fdata-sections -ffunction-sections -fno-asynchronous-unwind-tables \
                    -pipe -Wall
 

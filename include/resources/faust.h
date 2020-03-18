@@ -31,6 +31,8 @@
 #define __rt_data
 #define always_inline   inline __attribute__((__always_inline__))
 
+using std::signbit;
+
 namespace faust
 {
     /**
