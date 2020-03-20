@@ -1,7 +1,7 @@
 tamgamp.lv2 - Guitar amplifier simulator
 ========================================
 
-![Tamgamp in Ardour](res/tampgamp.png)
+![Tamgamp in Ardour](res/tamgamp.png)
 
 Tamgamp (Rhymes with: "Damage Amp") is LV2 guitar amp simulator that provides two plugins:
 * Tamgamp - a plugin based on Guitarix DK Builder simulated chains.
