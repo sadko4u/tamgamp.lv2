@@ -8,17 +8,12 @@ tamgamp.lv2 - Guitar amplifier simulator
 * TamgampGX - a plugin based on tuned Guitarix internal amplifiers implementation.
 
 The key features of this project according to initial technical requirements are:
-* Simplicity of the interface, no UI (use generic one), minimum knobs/sliders
-* Preamplifier simulation only, no cabinet/power amplifier simulation is required.
-* Smooth bypass button.
-* Smooth switch between amplifier models.
-* Smooth switch between tone control chains.
-* Smooth knob control without pops and other sound artifacts which allows to apply automation to the plugin.
+* Simplicity of the interface, no UI (use generic one), minimum knobs/sliders.
+* Preamplifier simulation only, for simplicity and flexibility (use a separate cab simulator).
+* Smooth bypass/automation. No pops, spikes or clicks.
 * Normalized output level: different amplifiers should sound almost of the same output loudness with different gain settings.
 
-The reference to the original Guitarix project: https://guitarix.org/
-
-It simulates the set of the following guitar amplifiers:
+The plugin simulates the set of the following guitar amplifiers:
 
 * Fender Princeton Reverb-amp AA1164 (without reverb module)
 * Fender Twin Reverb-Amp AA769 (Normal channel, bright off)
