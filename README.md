@@ -1,13 +1,19 @@
 tamgamp.lv2 - Guitar amplifier simulator
 ========================================
 
-Tamgamp (Pronouncement: "Damage Amp") is LV2 guitar amp simulator that provides two plugins:
+![Tamgamp in Ardour](res/tamgamp.png)
+
+**Tamgamp** (*Rhymes with:* "Damage Amp") is LV2 guitar amp simulator that provides two plugins:
 * Tamgamp - a plugin based on Guitarix DK Builder simulated chains.
 * TamgampGX - a plugin based on tuned Guitarix internal amplifiers implementation.
 
-The reference to the original Guitarix project: https://guitarix.org/
+The key features of this project according to initial technical requirements are:
+* Simplicity of the interface, no UI (use generic one), minimum knobs/sliders.
+* Preamplifier simulation only, for simplicity and flexibility (use a separate cab simulator).
+* Smooth bypass/automation. No pops, spikes or clicks.
+* Normalized output level: different amplifiers should sound almost of the same output loudness with different gain settings.
 
-It simulates the set of the following guitar amplifiers:
+The plugin simulates the set of the following guitar amplifiers:
 
 * Fender Princeton Reverb-amp AA1164 (without reverb module)
 * Fender Twin Reverb-Amp AA769 (Normal channel, bright off)
@@ -23,8 +29,9 @@ It simulates the set of the following guitar amplifiers:
 * VOX AC-30 Brilliant channel
 * VOX AC-30 normal channel
 
-This project simulates only preamplifier chains, so for proper sounding you
-need to additionally apply equalization or pre-captured impulse responses of different cabinets.
+This project simulates only preamplifier chains and does not attempt to do any cab simulation,
+so for proper sounding you need to additionally apply equalization or pre-captured impulse responses
+of different cabinets.
 
 For example, you may use the following tools for cabinet simulation:
 * LSP Impulse Responses Mono - https://lsp-plug.in/?page=manuals&section=impulse_responses_mono
