@@ -481,7 +481,7 @@ namespace tamgamp_lv2
         //-------------------------------------------------------------------------
         // LV2 stuff
         LV2_Handle lv2_instantiate(
-                const struct _LV2_Descriptor *descriptor,
+                const LV2_Descriptor *descriptor,
                 double sample_rate,
                 const char *bundle_path,
                 const LV2_Feature * const *features

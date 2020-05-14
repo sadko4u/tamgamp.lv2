@@ -1,11 +1,9 @@
 
-$(BUILD_DIR)/common.o: common.cpp \
- $(BASEDIR)/include/dsp/dsp.h \
+$(BUILD_DIR)/common.o: common.cpp $(BASEDIR)/include/dsp/dsp.h \
  $(BASEDIR)/include/dsp/common/types.h \
  $(BASEDIR)/include/dsp/common/context.h
 
-$(BUILD_DIR)/native.o: native.cpp \
- $(BASEDIR)/include/dsp/dsp.h \
+$(BUILD_DIR)/native.o: native.cpp $(BASEDIR)/include/dsp/dsp.h \
  $(BASEDIR)/include/dsp/common/types.h \
  $(BASEDIR)/include/dsp/common/context.h
 
