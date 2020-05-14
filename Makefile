@@ -101,9 +101,11 @@ export INSTALL
 
 # Build targets
 .DEFAULT_GOAL   := all
-.PHONY: deps all clean ttl install uninstall codegen srcgen
+.PHONY: deps all compile clean ttl install uninstall codegen srcgen
 
-all:
+all: compile ttl
+
+compile:
 	@echo "Building source"
 	mkdir -p $(BUILD_DIR)/src
 	$(MAKE) -C src all BUILD_DIR=$(BUILD_DIR)/src BUILD_FILE=$(BUILD_DIR)/$(LV2_BINARY)
@@ -127,15 +129,14 @@ $(TTL_FILES):
 	mkdir -p $(BUILD_DIR)/ttl
 	sed "$(TTL_SED_VARS)" $(LV2TTL_DIR)/$(notdir $(@)) > $(@)
 
-ttl: $(TTL_FILES)
-	@echo "Generated TTL files"
+ttl: compile $(TTL_FILES)
 
 clean:
 	@echo "Cleaning build files"
 	-rm -rf $(BUILD_DIR)
 	@echo "Clean OK"
 
-install: all ttl
+install: all
 	@echo "Installing LV2 plugins to $(DESTDIR)$(LV2DIR)/$(LV2_BUNDLE)"
 	mkdir -p $(DESTDIR)$(LV2DIR)/$(LV2_BUNDLE)
 	$(INSTALL) $(BUILD_DIR)/$(LV2_BINARY) $(DESTDIR)$(LV2DIR)/$(LV2_BUNDLE)
