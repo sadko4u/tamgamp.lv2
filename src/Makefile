@@ -41,17 +41,17 @@ codegen: $(GENERATED)
 
 $(SUBDIR_DEPS):
 	mkdir -p $(BUILD_DIR)/$(patsubst %.deps,%,$(@))
-	make -C $(patsubst %.deps,%,$(@)) BUILD_DIR=$(BUILD_DIR)/$(patsubst %.deps,%,$(@)) deps 
+	$(MAKE) -C $(patsubst %.deps,%,$(@)) BUILD_DIR=$(BUILD_DIR)/$(patsubst %.deps,%,$(@)) deps 
 
 $(BUILD_FILE): $(SUBDIRS) $(OBJFILES)
 	$(CXX) -o $(BUILD_FILE) -shared -fPIC $(LDFLAGS) $(SUBDIR_OBJS) $(OBJFILES) $(EXTERNAL_LIBS)
 
 $(SUBDIRS):
 	mkdir -p $(BUILD_DIR)/$(@)
-	make -C $(@) all BUILD_DIR=$(BUILD_DIR)/$(@) BUILD_FILE=$(BUILD_DIR)/$(@).o
+	$(MAKE) -C $(@) all BUILD_DIR=$(BUILD_DIR)/$(@) BUILD_FILE=$(BUILD_DIR)/$(@).o
 
 $(GENERATED):
-	make -C $(@) all BUILD_DIR=$(INCLUDE_DIR)/generated
+	$(MAKE) -C $(@) all BUILD_DIR=$(INCLUDE_DIR)/generated
 
 $(OBJFILES): $(patsubst $(BUILD_DIR)/%.o, %.cpp, $(@))
 	mkdir -p $(dir $(@))
