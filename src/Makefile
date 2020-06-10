@@ -44,7 +44,7 @@ $(SUBDIR_DEPS):
 	make -C $(patsubst %.deps,%,$(@)) BUILD_DIR=$(BUILD_DIR)/$(patsubst %.deps,%,$(@)) deps 
 
 $(BUILD_FILE): $(SUBDIRS) $(OBJFILES)
-	$(CXX) -o $(BUILD_FILE) -shared -fPIC $(SUBDIR_OBJS) $(OBJFILES) $(EXTERNAL_LIBS)
+	$(CXX) -o $(BUILD_FILE) -shared -fPIC $(LDFLAGS) $(SUBDIR_OBJS) $(OBJFILES) $(EXTERNAL_LIBS)
 
 $(SUBDIRS):
 	mkdir -p $(BUILD_DIR)/$(@)
